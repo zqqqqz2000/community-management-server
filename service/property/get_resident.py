@@ -1,6 +1,4 @@
 from dao.resident_information import ResidentInformation
-from global_var import db
-import hashlib
 from typing import *
 
 
@@ -9,8 +7,10 @@ def get_all_resident():
     residents: List[ResidentInformation] = query_res.all()
     result: List[Dict[str, Union[str, int]]] = [{
         'id': resident.id,
+        'username': resident.username,
         'phone_number': resident.phone_number,
         'name': resident.name,
-        'job': resident.job
+        'job': resident.job,
+        'actions': None
     } for resident in residents]
     return result

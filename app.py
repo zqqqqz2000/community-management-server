@@ -1,13 +1,11 @@
 from flask import Flask
 from flask_cors import CORS
-from flask_session import Session
 from api.property_management import property_management
 from global_var import db
 import config
 
 app = Flask(__name__)
 app.config.from_object(config)
-Session(app)
 CORS(app, resources=r'/*', supports_credentials=True)
 
 
