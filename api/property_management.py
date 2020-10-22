@@ -18,8 +18,7 @@ def login():
     username: str = data['username']
     password: str = data['password']
     if property_login(username, password):
-        token = s.dumps({'username': username}).decode("ascii")
-        session['login'] = True
+        token = s.dumps({'username': username, 'role': 'property'}).decode("ascii")
         return {'success': True, 'token': token}
     else:
         return {'success': False, 'info': 'username or password incorrect.'}
@@ -27,9 +26,9 @@ def login():
 
 @property_management.route('/add_resident', methods=['POST'])
 @login_check
-def add_resident(username):
+def add_resident(token):
     data = request.get_json(silent=True)
-    if username:
+    if token['role'] == 'property':
         username = data['username']
         password = data['password']
         phone_number = data['phone_number']
@@ -43,8 +42,8 @@ def add_resident(username):
 
 @property_management.route('/get_all_resident', methods=['POST'])
 @login_check
-def get_all_resident(username):
-    if username:
+def get_all_resident(token):
+    if token['role'] == 'property':
         return {
             'success': True,
             'residents': get_all_resident_api()
@@ -58,8 +57,8 @@ def get_all_resident(username):
 
 @property_management.route('/delete_residents', methods=['POST'])
 @login_check
-def delete_residents(username):
-    if username:
+def delete_residents(token):
+    if token['role'] == 'property':
         data = request.get_json(silent=True)
         residents_ids = data['residents_id']
         delete_residents_api(residents_ids)
