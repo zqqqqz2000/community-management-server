@@ -24,8 +24,9 @@ def add_resident(
         )
         db.session.add(resident_information)
     else:
+        if password != 'do_not_change':
+            resident_information.password = pass_hash
         resident_information.username = username
-        resident_information.password = pass_hash
         resident_information.phone_number = phone_number
         resident_information.name = name
         resident_information.job = job

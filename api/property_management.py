@@ -1,13 +1,14 @@
 from flask.blueprints import Blueprint
+from typing import *
 
-from service.property.delete_resident import delete_residents as delete_residents_api
-from service.property.login import property_login
+from service.add_parking_spot import add_parking_spot_user as add_parking_spot_user_api
+from service.delete_resident import delete_residents as delete_residents_api
+from service.login import property_login
 from flask import request
-from flask import session
-from service.property.add_resident import add_resident as add_resident_api
-from service.property.get_resident import get_all_resident as get_all_resident_api
-from utils.decorator import login_check
-from global_var import s
+from service.add_resident import add_resident as add_resident_api
+from service.get_resident import get_all_resident as get_all_resident_api
+from utils.token import with_token, tokenize
+from service.get_parking_spot import get_parking_spot as get_parking_spot_api
 
 property_management = Blueprint('property', __name__, url_prefix='/property')
 
@@ -18,17 +19,17 @@ def login():
     username: str = data['username']
     password: str = data['password']
     if property_login(username, password):
-        token = s.dumps({'username': username, 'role': 'property'}).decode("ascii")
+        token = tokenize({'username': username, 'role': 'property'})
         return {'success': True, 'token': token}
     else:
         return {'success': False, 'info': 'username or password incorrect.'}
 
 
 @property_management.route('/add_resident', methods=['POST'])
-@login_check
-def add_resident(token):
+@with_token
+def add_resident(token_data: Dict):
     data = request.get_json(silent=True)
-    if token['role'] == 'property':
+    if token_data and token_data['role'] == 'property':
         username = data['username']
         password = data['password']
         phone_number = data['phone_number']
@@ -41,9 +42,9 @@ def add_resident(token):
 
 
 @property_management.route('/get_all_resident', methods=['POST'])
-@login_check
-def get_all_resident(token):
-    if token['role'] == 'property':
+@with_token
+def get_all_resident(token_data: Dict):
+    if token_data and token_data['role'] == 'property':
         return {
             'success': True,
             'residents': get_all_resident_api()
@@ -56,9 +57,9 @@ def get_all_resident(token):
 
 
 @property_management.route('/delete_residents', methods=['POST'])
-@login_check
-def delete_residents(token):
-    if token['role'] == 'property':
+@with_token
+def delete_residents(token_data: Optional[Dict]):
+    if token_data and token_data['role'] == 'property':
         data = request.get_json(silent=True)
         residents_ids = data['residents_id']
         delete_residents_api(residents_ids)
@@ -70,3 +71,30 @@ def delete_residents(token):
             'success': False,
             'info': 'Please login first.'
         }
+
+
+@property_management.route('/get_parking_spot', methods=['POST'])
+@with_token
+def get_parking_spot(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        return {'success': True, 'parking_spot': get_parking_spot_api(data['username'])}
+    else:
+        return {'success': False, 'info': 'Please login first'}
+
+
+@property_management.route('/add_parking_spot_user', methods=['POST'])
+@with_token
+def add_parking_spot_user(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        username = data['username']
+        parking_spot_number = data['parking_spot_number']
+        license_ = data['license']
+        try:
+            if add_parking_spot_user_api(username, parking_spot_number, license_):
+                return {'success': True}
+            else:
+                return {'success': False, 'info': 'user error'}
+        except Exception as ignore:
+            return {'success': False, 'info': 'Duplicate license or spot number'}

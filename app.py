@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from api.property_management import property_management
+from api.resident_management import resident_management
 from global_var import db
 import config
 
@@ -17,6 +18,7 @@ def development_init():
 
 def init():
     app.register_blueprint(property_management)
+    app.register_blueprint(resident_management)
 
 
 development_init()
