@@ -1,10 +1,14 @@
+import datetime
+
 from flask.blueprints import Blueprint
 from typing import *
 
 from service.add_parking_spot import add_parking_spot_user as add_parking_spot_user_api
 from service.add_parking_spot import add_parking_spot as add_parking_spot_api
+from service.add_parking_spot_pay import add_parking_spot_pay_all
 from service.delete_parking_spot import delete_parking_spot_user_pr
 from service.delete_resident import delete_residents as delete_residents_api
+from service.get_parking_spot_pay import get_parking_spot_pay_all_from_pid
 from service.login import property_login
 from service.delete_parking_spot import delete_parking_spot as delete_parking_spot_api
 from flask import request
@@ -155,3 +159,29 @@ def add_parking_spot(token_data: Optional[Dict]):
             return {'success': False, 'info': 'user error'}
     except Exception as ignore:
         return {'success': False, 'info': 'this parking spot has been used by resident.'}
+
+
+@property_management.route('/add_parking_spot_pay', methods=['POST'])
+@with_token
+def add_parking_spot_pay(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        price = data['price']
+        apply_date_str = data['date']
+        date = datetime.datetime.strptime(apply_date_str, '%Y-%M-%d').date()
+        add_parking_spot_pay_all(price, date)
+        return {'success': True}
+    else:
+        return {'success': False, 'info': 'user error'}
+
+
+@property_management.route('/get_parking_spot_pays', methods=['POST'])
+@with_token
+def get_parking_spot_pays(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        pid = data['pid']
+        return {'success': True, 'pay_his': get_parking_spot_pay_all_from_pid(pid)}
+    else:
+        return {'success': False, 'info': 'user error'}
+

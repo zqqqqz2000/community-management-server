@@ -10,18 +10,11 @@ app.config.from_object(config)
 CORS(app, resources=r'/*', supports_credentials=True)
 
 
-def development_init():
-    # development sql init
-    from dao.resident_information import ResidentInformation
-    from dao.property_management_information import PropertyManagementInformation
-
-
 def init():
     app.register_blueprint(property_management)
     app.register_blueprint(resident_management)
 
 
-development_init()
 init()
 
 with app.app_context():

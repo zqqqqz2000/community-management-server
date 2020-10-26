@@ -6,3 +6,4 @@ class PR(db.Model):
     id = db.Column(db.Integer, primary_key=True, unique=True)
     pid = db.Column(db.Integer, db.ForeignKey('parking_spot_information.id'), nullable=False)
     rid = db.Column(db.Integer, db.ForeignKey('resident_information.id'), nullable=False)
+    db.UniqueConstraint(pid, rid, name='prid_constrain')
