@@ -9,8 +9,10 @@ from service.add_parking_spot_pay import add_parking_spot_pay_all
 from service.delete_parking_spot import delete_parking_spot_user_pr
 from service.delete_resident import delete_residents as delete_residents_api
 from service.get_parking_spot_pay import get_parking_spot_pay_all_from_pid
+from service.get_house import get_houses as get_houses_api
 from service.login import property_login
 from service.delete_parking_spot import delete_parking_spot as delete_parking_spot_api
+from service.add_house import add_house as add_house_api
 from flask import request
 from service.add_resident import add_resident as add_resident_api
 from service.get_resident import get_all_resident as get_all_resident_api
@@ -185,3 +187,32 @@ def get_parking_spot_pays(token_data: Optional[Dict]):
     else:
         return {'success': False, 'info': 'user error'}
 
+
+@property_management.route('/add_house', methods=['POST'])
+@with_token
+def add_house(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        building_num = data['building_number']
+        room_num = data['room_number']
+        area = data['area']
+        family_size = data['family_size']
+        add_house_api(
+            building_num,
+            room_num,
+            area,
+            family_size
+        )
+        return {'success': True}
+    else:
+        return {'success': False, 'info': 'user error'}
+
+
+@property_management.route('/get_houses', methods=['POST'])
+@with_token
+def get_houses(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        return {'success': True, 'houses': get_houses_api()}
+    else:
+        return {'success': False, 'info': 'user error'}

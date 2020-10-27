@@ -1,6 +1,5 @@
 from typing import *
 from dao.pr import PR
-from dao.parking_spot_information import ParkingSpotInformation
 from global_var import db
 from dao.parking_spot_information import ParkingSpotInformation
 
