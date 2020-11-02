@@ -6,6 +6,7 @@ from typing import *
 from service.add_parking_spot import add_parking_spot_user as add_parking_spot_user_api
 from service.add_parking_spot import add_parking_spot as add_parking_spot_api
 from service.add_parking_spot_pay import add_parking_spot_pay_all
+from service.add_property_fee import add_property_fee_all
 from service.delete_parking_spot import delete_parking_spot_user_pr
 from service.delete_resident import delete_residents as delete_residents_api
 from service.get_parking_spot_pay import get_parking_spot_pay_all_from_pid
@@ -13,6 +14,8 @@ from service.get_house import get_houses as get_houses_api
 from service.login import property_login
 from service.delete_parking_spot import delete_parking_spot as delete_parking_spot_api
 from service.add_house import add_house as add_house_api
+from service.delete_house import delete_houses as delete_houses_api
+from service.add_house import add_rh as add_rh_api
 from flask import request
 from service.add_resident import add_resident as add_resident_api
 from service.get_resident import get_all_resident as get_all_resident_api
@@ -214,5 +217,49 @@ def get_houses(token_data: Optional[Dict]):
     data = request.get_json(silent=True)
     if token_data and token_data['role'] == 'property':
         return {'success': True, 'houses': get_houses_api()}
+    else:
+        return {'success': False, 'info': 'user error'}
+
+
+@property_management.route('/delete_houses', methods=['POST'])
+@with_token
+def delete_houses(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        houses = data['houses']
+        delete_houses_api(houses)
+        return {'success': True}
+    else:
+        return {'success': False, 'info': 'user error'}
+
+
+@property_management.route('/add_rh', methods=['POST'])
+@with_token
+def add_rh(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        uid = data['id']
+        building_number = data['building_number']
+        room_number = data['room_number']
+        if add_rh_api(uid, building_number, room_number):
+            return {'success': True}
+        else:
+            return {'success': False, 'info': 'house do not exist'}
+    else:
+        return {'success': False, 'info': 'user error'}
+
+
+@property_management.route('/add_property_fee', methods=['POST'])
+@with_token
+def add_property_fee(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        price = data['price']
+        apply_date_str = data['date']
+        date = datetime.datetime.strptime(apply_date_str, '%Y-%M-%d').date()
+        if add_property_fee_all(price, date):
+            return {'success': True}
+        else:
+            return {'success': False, 'info': 'some thing error!'}
     else:
         return {'success': False, 'info': 'user error'}

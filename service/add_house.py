@@ -1,4 +1,6 @@
 from dao.house_information import HouseInformation
+from dao.rh import RH
+from dao.resident_information import ResidentInformation
 from global_var import db
 
 
@@ -11,4 +13,17 @@ def add_house(building_number: str, room_number: str, area: float, family_size: 
         maintenance_balance=0
     )
     db.session.add(h)
+    db.session.commit()
+
+
+def add_rh(uid: int, building_number: str, room_number: str) -> bool:
+    r: ResidentInformation = ResidentInformation.query.filter_by(id=uid).first()
+    h: HouseInformation = HouseInformation.query.filter_by(
+        building_number=building_number,
+        room_number=room_number
+    ).first()
+    if not h:
+        return False
+    rh = RH(rid=r.id, hid=h.id)
+    db.session.add(rh)
     db.session.commit()
