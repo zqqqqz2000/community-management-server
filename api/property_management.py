@@ -10,7 +10,9 @@ from service.add_property_fee import add_property_fee_all
 from service.delete_parking_spot import delete_parking_spot_user_pr
 from service.delete_resident import delete_residents as delete_residents_api
 from service.get_parking_spot_pay import get_parking_spot_pay_all_from_pid
-from service.get_house import get_houses as get_houses_api
+from service.get_house import get_houses as get_houses_api, get_house_from_resident
+from service.get_property_fee import get_all_property_fee
+from service.get_property_fee import get_property_fee as get_property_fee_api
 from service.login import property_login
 from service.delete_parking_spot import delete_parking_spot as delete_parking_spot_api
 from service.add_house import add_house as add_house_api
@@ -238,10 +240,10 @@ def delete_houses(token_data: Optional[Dict]):
 def add_rh(token_data: Optional[Dict]):
     data = request.get_json(silent=True)
     if token_data and token_data['role'] == 'property':
-        uid = data['id']
+        rid = data['rid']
         building_number = data['building_number']
         room_number = data['room_number']
-        if add_rh_api(uid, building_number, room_number):
+        if add_rh_api(rid, building_number, room_number):
             return {'success': True}
         else:
             return {'success': False, 'info': 'house do not exist'}
@@ -261,5 +263,27 @@ def add_property_fee(token_data: Optional[Dict]):
             return {'success': True}
         else:
             return {'success': False, 'info': 'some thing error!'}
+    else:
+        return {'success': False, 'info': 'user error'}
+
+
+@property_management.route('/get_property_fee', methods=['POST'])
+@with_token
+def get_property_fee(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        hid: int = data['hid']
+        return {'success': True, 'property_fees': get_property_fee_api(hid)}
+    else:
+        return {'success': False, 'info': 'user error'}
+
+
+@property_management.route('/get_get_house_from_res', methods=['POST'])
+@with_token
+def get_get_house_from_res(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        rid: int = data["rid"]
+        return {'success': True, 'houses': get_house_from_resident(rid)}
     else:
         return {'success': False, 'info': 'user error'}
