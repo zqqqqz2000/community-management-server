@@ -12,6 +12,7 @@ from service.delete_resident import delete_residents as delete_residents_api
 from service.get_parking_spot_pay import get_parking_spot_pay_all_from_pid
 from service.get_house import get_houses as get_houses_api, get_house_from_resident
 from service.get_property_fee import get_all_property_fee
+from service.delete_house import delete_rh as delete_rh_api
 from service.get_property_fee import get_property_fee as get_property_fee_api
 from service.login import property_login
 from service.delete_parking_spot import delete_parking_spot as delete_parking_spot_api
@@ -285,5 +286,19 @@ def get_get_house_from_res(token_data: Optional[Dict]):
     if token_data and token_data['role'] == 'property':
         rid: int = data["rid"]
         return {'success': True, 'houses': get_house_from_resident(rid)}
+    else:
+        return {'success': False, 'info': 'user error'}
+
+
+@property_management.route('/delete_rh', methods=['POST'])
+@with_token
+def delete_rh(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        rhid: int = data["rhid"]
+        if delete_rh_api(rhid):
+            return {'success': True}
+        else:
+            return {'success': False, 'info': 'the house do not belong this resident'}
     else:
         return {'success': False, 'info': 'user error'}
