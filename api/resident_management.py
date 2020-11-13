@@ -4,11 +4,13 @@ from typing import *
 from service.add_resident import add_resident
 from service.get_house import get_house_from_resident_username
 from service.get_parking_spot_pay import get_parking_spot_pay_all_from_username
+from service.get_property_fee import get_property_fee_from_username
 from service.login import resident_login
 from flask import request
 from service.get_parking_spot import get_parking_spot
 from service.get_resident import get_resident
 from service.parking_spot_pay import parking_spot_pay
+from service.property_fee_pay import property_fee_pay
 from utils.token import with_token
 from global_var import s
 
@@ -99,5 +101,31 @@ def get_houses(token_data: Optional[Dict]):
     if token_data and token_data['role'] == 'resident':
         username: str = token_data['username']
         return {'success': True, 'houses': get_house_from_resident_username(username)}
+    else:
+        return {'success': False, 'info': 'Please login first'}
+
+
+@resident_management.route('/get_property_fee', methods=['POST'])
+@with_token
+def get_property_fee(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'resident':
+        username: str = token_data['username']
+        return {'success': True, 'property_fees': get_property_fee_from_username(username)}
+    else:
+        return {'success': False, 'info': 'Please login first'}
+
+
+@resident_management.route('/pay_property_fee', methods=['POST'])
+@with_token
+def pay_property_fee(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'resident':
+        username: str = token_data['username']
+        pid = data['pid']
+        if property_fee_pay(pid, username):
+            return {'success': True}
+        else:
+            return {'success': False, 'info': 'Has been pay.'}
     else:
         return {'success': False, 'info': 'Please login first'}
