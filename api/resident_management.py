@@ -1,8 +1,10 @@
 from flask.blueprints import Blueprint
 from typing import *
 
+from service.add_maintenance import add_maintenance
 from service.add_resident import add_resident
 from service.get_house import get_house_from_resident_username
+from service.get_maintenance import get_maintenance_from_username
 from service.get_parking_spot_pay import get_parking_spot_pay_all_from_username
 from service.get_property_fee import get_property_fee_from_username
 from service.login import resident_login
@@ -127,5 +129,34 @@ def pay_property_fee(token_data: Optional[Dict]):
             return {'success': True}
         else:
             return {'success': False, 'info': 'Has been pay.'}
+    else:
+        return {'success': False, 'info': 'Please login first'}
+
+
+@resident_management.route('/apply_maintenance', methods=['POST'])
+@with_token
+def apply_maintenance(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'resident':
+        username: str = token_data['username']
+        apply = data['apply']
+        add_maintenance(
+            apply['hid'],
+            apply['apply_date'],
+            apply['comment'],
+            apply['from_balance']
+        )
+        return {'success': True}
+    else:
+        return {'success': False, 'info': 'Please login first'}
+
+
+@resident_management.route('/get_maintenance', methods=['POST'])
+@with_token
+def get_maintenance(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'resident':
+        username: str = token_data['username']
+        return {'success': True, 'maintenance': get_maintenance_from_username(username)}
     else:
         return {'success': False, 'info': 'Please login first'}
