@@ -302,3 +302,17 @@ def delete_rh(token_data: Optional[Dict]):
             return {'success': False, 'info': 'the house do not belong this resident'}
     else:
         return {'success': False, 'info': 'user error'}
+
+
+@property_management.route('/get_maintenance', methods=['POST'])
+@with_token
+def get_maintenance(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        rhid: int = data["rhid"]
+        if delete_rh_api(rhid):
+            return {'success': True}
+        else:
+            return {'success': False, 'info': 'the house do not belong this resident'}
+    else:
+        return {'success': False, 'info': 'user error'}

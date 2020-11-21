@@ -3,6 +3,7 @@ from typing import *
 
 from service.add_maintenance import add_maintenance
 from service.add_resident import add_resident
+from service.delete_maintenance import delete_maintenance
 from service.get_house import get_house_from_resident_username
 from service.get_maintenance import get_maintenance_from_username
 from service.get_parking_spot_pay import get_parking_spot_pay_all_from_username
@@ -158,5 +159,17 @@ def get_maintenance(token_data: Optional[Dict]):
     if token_data and token_data['role'] == 'resident':
         username: str = token_data['username']
         return {'success': True, 'maintenance': get_maintenance_from_username(username)}
+    else:
+        return {'success': False, 'info': 'Please login first'}
+
+
+@resident_management.route('/delete_maintenance', methods=['POST'])
+@with_token
+def delete_maintenance_(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'resident':
+        id_ = data['id']
+        delete_maintenance(id_)
+        return {'success': True}
     else:
         return {'success': False, 'info': 'Please login first'}
