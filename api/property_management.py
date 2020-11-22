@@ -3,6 +3,7 @@ import datetime
 from flask.blueprints import Blueprint
 from typing import *
 
+from service.add_maintenance import pay_maintenance
 from service.add_parking_spot import add_parking_spot_user as add_parking_spot_user_api
 from service.add_parking_spot import add_parking_spot as add_parking_spot_api
 from service.add_parking_spot_pay import add_parking_spot_pay_all
@@ -12,17 +13,19 @@ from service.delete_resident import delete_residents as delete_residents_api
 from service.get_parking_spot_pay import get_parking_spot_pay_all_from_pid
 from service.get_house import get_houses as get_houses_api, get_house_from_resident
 from service.get_property_fee import get_all_property_fee
+from service.get_maintenance import get_maintenance as get_maintenance_api
 from service.delete_house import delete_rh as delete_rh_api
 from service.get_property_fee import get_property_fee as get_property_fee_api
 from service.login import property_login
 from service.delete_parking_spot import delete_parking_spot as delete_parking_spot_api
-from service.add_house import add_house as add_house_api
+from service.add_house import add_house as add_house_api, recharge_maintenance_balance
 from service.delete_house import delete_houses as delete_houses_api
 from service.add_house import add_rh as add_rh_api
 from flask import request
 from service.add_resident import add_resident as add_resident_api
 from service.get_resident import get_all_resident as get_all_resident_api
 from service.get_parking_spot import get_all_spot
+from service.add_maintenance import pay_maintenance as pay_maintenance_api
 from utils.token import with_token, tokenize
 from service.get_parking_spot import get_parking_spot as get_parking_spot_api
 
@@ -309,10 +312,22 @@ def delete_rh(token_data: Optional[Dict]):
 def get_maintenance(token_data: Optional[Dict]):
     data = request.get_json(silent=True)
     if token_data and token_data['role'] == 'property':
-        rhid: int = data["rhid"]
-        if delete_rh_api(rhid):
-            return {'success': True}
-        else:
-            return {'success': False, 'info': 'the house do not belong this resident'}
+        return {'success': True, 'maintenance': get_maintenance_api()}
+    else:
+        return {'success': False, 'info': 'user error'}
+
+
+@property_management.route('/pay_maintenance', methods=['POST'])
+@with_token
+def pay_maintenance(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        id_ = data['id']
+        fix_date = data['fix_date']
+        fix_number = data['fix_number']
+        pay_amount = data['pay_amount']
+        if not pay_maintenance_api(id_, fix_date, fix_number, pay_amount):
+            return {'success': True, 'info': '维修基金余额不足或选择当面付款方式，请当面结算'}
+        return {'success': True, 'info': '维修费用已从维修基金中扣除'}
     else:
         return {'success': False, 'info': 'user error'}

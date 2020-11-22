@@ -1,6 +1,7 @@
 from flask.blueprints import Blueprint
 from typing import *
 
+from service.add_house import recharge_maintenance_balance
 from service.add_maintenance import add_maintenance
 from service.add_resident import add_resident
 from service.delete_maintenance import delete_maintenance
@@ -173,3 +174,16 @@ def delete_maintenance_(token_data: Optional[Dict]):
         return {'success': True}
     else:
         return {'success': False, 'info': 'Please login first'}
+
+
+@resident_management.route('/recharge', methods=['POST'])
+@with_token
+def recharge(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'resident':
+        id_ = data['id']
+        sum_ = float(data['sum'])
+        recharge_maintenance_balance(id_, sum_)
+        return {'success': True}
+    else:
+        return {'success': False, 'info': 'user error'}

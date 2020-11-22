@@ -27,3 +27,9 @@ def add_rh(rid: int, building_number: str, room_number: str) -> bool:
     db.session.add(rh)
     db.session.commit()
     return True
+
+
+def recharge_maintenance_balance(hid: int, sum_: float):
+    h: HouseInformation = HouseInformation.query.filter_by(id=hid).first()
+    h.maintenance_balance += sum_
+    db.session.commit()

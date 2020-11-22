@@ -11,6 +11,7 @@ CORS(app, resources=r'/*', supports_credentials=True)
 
 
 def init():
+    import triggers.maintenance_pay
     app.register_blueprint(property_management)
     app.register_blueprint(resident_management)
 
