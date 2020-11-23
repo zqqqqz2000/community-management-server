@@ -11,3 +11,5 @@ class MaintenanceInformation(db.Model):
     pay_amount = db.Column(db.Float, nullable=True)
     comment = db.Column(db.String(128))
     from_balance = db.Column(db.Integer, default=0)
+    db.CheckConstraint('fix_date >= apply_date', name='check_date')
+    db.CheckConstraint('pay_amount > 0', name='check_pay')

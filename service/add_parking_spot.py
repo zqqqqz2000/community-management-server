@@ -11,7 +11,6 @@ def add_parking_spot_user(username: str, parking_spot_number: str, license_: str
         return False
     p: ParkingSpotInformation = ParkingSpotInformation.query.filter_by(
         parking_spot_num=parking_spot_number,
-        license=license_
     ).first()
     if not p:
         p: ParkingSpotInformation = ParkingSpotInformation(parking_spot_num=parking_spot_number, license=license_)

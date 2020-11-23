@@ -12,6 +12,8 @@ def get_maintenance():
         MaintenanceInformation,
         HouseInformation.building_number,
         HouseInformation.room_number
+    ).filter(
+        MaintenanceInformation.hid == HouseInformation.id
     ).all()
     return [{
         'id': maintenance.id,

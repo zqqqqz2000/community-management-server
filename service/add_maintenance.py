@@ -26,6 +26,7 @@ def pay_maintenance(
     m.pay_amount = float(pay_amount)
     # 当面结清
     if not m.from_balance:
+        db.session.commit()
         return False
     try:
         db.session.commit()

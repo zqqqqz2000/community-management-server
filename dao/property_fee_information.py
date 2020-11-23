@@ -11,3 +11,5 @@ class PropertyFeeInformation(db.Model):
     ispay = db.Column(db.Integer, nullable=False)
     handle_rid = db.Column(db.Integer, db.ForeignKey('resident_information.id'), nullable=True)
     order_number = db.Column(db.String(32), nullable=True)
+    db.CheckConstraint('pay_date >= date', name='check_pay_date')
+    db.CheckConstraint('pay_amount > 0', name='check_pay_amount_positive')

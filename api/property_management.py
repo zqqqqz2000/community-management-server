@@ -23,9 +23,10 @@ from service.delete_house import delete_houses as delete_houses_api
 from service.add_house import add_rh as add_rh_api
 from flask import request
 from service.add_resident import add_resident as add_resident_api
-from service.get_resident import get_all_resident as get_all_resident_api
+from service.get_resident import get_all_resident as get_all_resident_api, query_residents
 from service.get_parking_spot import get_all_spot
 from service.add_maintenance import pay_maintenance as pay_maintenance_api
+from service.statistics import get_parking_fee_statistics, get_property_fee_statistics
 from utils.token import with_token, tokenize
 from service.get_parking_spot import get_parking_spot as get_parking_spot_api
 
@@ -329,5 +330,39 @@ def pay_maintenance(token_data: Optional[Dict]):
         if not pay_maintenance_api(id_, fix_date, fix_number, pay_amount):
             return {'success': True, 'info': '维修基金余额不足或选择当面付款方式，请当面结算'}
         return {'success': True, 'info': '维修费用已从维修基金中扣除'}
+    else:
+        return {'success': False, 'info': 'user error'}
+
+
+@property_management.route('/get_parking_fee_statistics', methods=['POST'])
+@with_token
+def parking_fee_statistics(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        total_dict, un_pay_dict = get_parking_fee_statistics()
+        return {'success': True, 'statistics': {'total': total_dict, 'unpay': un_pay_dict}}
+    else:
+        return {'success': False, 'info': 'user error'}
+
+
+@property_management.route('/get_property_fee_statistics', methods=['POST'])
+@with_token
+def property_fee_statistics(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        total_dict, un_pay_dict = get_property_fee_statistics()
+        return {'success': True, 'statistics': {'total': total_dict, 'unpay': un_pay_dict}}
+    else:
+        return {'success': False, 'info': 'user error'}
+
+
+@property_management.route('/query_resident', methods=['POST'])
+@with_token
+def query_resident(token_data: Optional[Dict]):
+    data = request.get_json(silent=True)
+    if token_data and token_data['role'] == 'property':
+        del data['token']
+        data = {k: v for k, v in data.items() if v}
+        return {'success': True, 'residents': query_residents(**data)}
     else:
         return {'success': False, 'info': 'user error'}

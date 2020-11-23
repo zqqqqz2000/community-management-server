@@ -10,3 +10,4 @@ class ParkingSpotPayInformation(db.Model):
     pay_amount = db.Column(db.Float, nullable=False)
     handle_rid = db.Column(db.Integer, db.ForeignKey('resident_information.id'), nullable=True)
     ispay = db.Column(db.Integer, nullable=False)
+    db.CheckConstraint('pay_date >= date', name='check_pay_date')
