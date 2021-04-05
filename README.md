@@ -1,4 +1,4 @@
-# community-management(小区管理系统)
+# community-management小区管理系统（学校大作业）
 ## 前言
 
 本项目为小区管理系统后端，演示截图和前言详情请见前端
